@@ -1,187 +1,13 @@
-// import React, { useState } from 'react';
-// import { Menu, X, LogOut, BarChart3, Users, Package } from 'lucide-react';
-// import { useNavigate } from 'react-router-dom';
-// import { useAuth } from '../App';
-// import AdminSidebar from '../components/AdminSidebar';
-// import UserManagement from '../data_management/admin/UserManagement';
-// import ProductManagement from '../data_management/admin/ProductManagement';
-
-// const AdminDashboard = () => {
-//   const [sidebarOpen, setSidebarOpen] = useState(false);
-//   const [activeTab, setActiveTab] = useState('overview');
-//   const navigate = useNavigate();
-//   const { currentUser, logout } = useAuth();
-
-//   // Hardcoded admin statistics
-//   const stats = [
-//     { label: 'Total Users', value: 6, color: 'bg-blue-500', icon: Users },
-//     { label: 'Total Products', value: 6, color: 'bg-green-500', icon: Package },
-//     { label: 'Active Orders', value: 12, color: 'bg-purple-500', icon: BarChart3 },
-//     { label: 'Revenue', value: '$5,249.88', color: 'bg-indigo-500', icon: BarChart3 },
-//   ];
-
-//   // Hardcoded recent activities
-//   const recentActivities = [
-//     { id: 1, action: 'New user registered', user: 'Charlie Wilson', time: '2 hours ago' },
-//     { id: 2, action: 'Product added', product: 'Organic Chemistry', time: '4 hours ago' },
-//     { id: 3, action: 'Order completed', order: '#12345', time: '6 hours ago' },
-//     { id: 4, action: 'User suspended', user: 'Bob Johnson', time: '1 day ago' },
-//   ];
-
-//   const handleLogout = () => {
-//     logout();
-//     navigate('/');
-//   };
-
-//   return (
-//     <div className="flex h-screen bg-gray-100">
-//       {/* Sidebar */}
-//       <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
-//       {/* Main Content */}
-//       <div className="flex-1 flex flex-col overflow-hidden">
-//         {/* Top Navigation */}
-//         <nav className="bg-gradient-to-r from-purple-600 to-indigo-700 shadow-lg px-6 py-4 flex items-center justify-between text-white">
-//           <button
-//             onClick={() => setSidebarOpen(!sidebarOpen)}
-//             className="md:hidden hover:bg-purple-500 p-2 rounded-lg transition-colors"
-//           >
-//             {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-//           </button>
-//           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-//           <div className="flex items-center gap-4">
-//             <span className="text-sm font-semibold">{currentUser?.firstName} {currentUser?.lastName}</span>
-//             <button
-//               onClick={handleLogout}
-//               className="flex items-center gap-2 bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg font-semibold transition"
-//             >
-//               <LogOut size={18} />
-//               Logout
-//             </button>
-//           </div>
-//         </nav>
-
-//         {/* Content Area */}
-//         <div className="flex-1 overflow-auto p-4 md:p-8">
-//           {/* Tab Navigation */}
-//           <div className="flex space-x-4 mb-6 border-b border-gray-300 overflow-x-auto">
-//             <button
-//               onClick={() => setActiveTab('overview')}
-//               className={`px-4 py-2 font-semibold border-b-2 transition-colors whitespace-nowrap ${
-//                 activeTab === 'overview'
-//                   ? 'border-purple-600 text-purple-600'
-//                   : 'border-transparent text-gray-600 hover:text-purple-600'
-//               }`}
-//             >
-//               📊 Overview
-//             </button>
-//             <button
-//               onClick={() => setActiveTab('users')}
-//               className={`px-4 py-2 font-semibold border-b-2 transition-colors whitespace-nowrap ${
-//                 activeTab === 'users'
-//                   ? 'border-purple-600 text-purple-600'
-//                   : 'border-transparent text-gray-600 hover:text-purple-600'
-//               }`}
-//             >
-//               👥 Users
-//             </button>
-//             <button
-//               onClick={() => setActiveTab('products')}
-//               className={`px-4 py-2 font-semibold border-b-2 transition-colors whitespace-nowrap ${
-//                 activeTab === 'products'
-//                   ? 'border-purple-600 text-purple-600'
-//                   : 'border-transparent text-gray-600 hover:text-purple-600'
-//               }`}
-//             >
-//               📦 Products
-//             </button>
-//           </div>
-
-//           {/* Overview Tab */}
-//           {activeTab === 'overview' && (
-//             <div className="space-y-6">
-//               {/* Stats Grid */}
-//               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-//                 {stats.map((stat) => {
-//                   const Icon = stat.icon;
-//                   return (
-//                     <div key={stat.label} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-//                       <div className={`${stat.color} text-white rounded-lg w-12 h-12 flex items-center justify-center mb-4`}>
-//                         <Icon size={24} />
-//                       </div>
-//                       <h3 className="text-gray-600 text-sm font-medium">{stat.label}</h3>
-//                       <p className="text-2xl font-bold text-gray-800 mt-2">{stat.value}</p>
-//                     </div>
-//                   );
-//                 })}
-//               </div>
-
-//               {/* Recent Activities */}
-//               <div className="bg-white rounded-lg shadow-md p-6">
-//                 <h2 className="text-lg font-bold text-gray-800 mb-4">Recent Activities</h2>
-//                 <div className="space-y-4">
-//                   {recentActivities.map((activity) => (
-//                     <div key={activity.id} className="flex items-center justify-between py-3 border-b border-gray-200 last:border-b-0">
-//                       <div>
-//                         <p className="font-medium text-gray-800">{activity.action}</p>
-//                         <p className="text-sm text-gray-600">
-//                           {activity.user || activity.product || activity.order}
-//                         </p>
-//                       </div>
-//                       <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{activity.time}</span>
-//                     </div>
-//                   ))}
-//                 </div>
-//               </div>
-
-//               {/* Admin Info Card */}
-//               <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg shadow-md p-6 border border-purple-200">
-//                 <h2 className="text-lg font-bold text-gray-800 mb-4">Admin Information</h2>
-//                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//                   <div>
-//                     <p className="text-gray-600 text-sm">Name</p>
-//                     <p className="text-lg font-semibold text-gray-800">{currentUser?.firstName} {currentUser?.lastName}</p>
-//                   </div>
-//                   <div>
-//                     <p className="text-gray-600 text-sm">Email</p>
-//                     <p className="text-lg font-semibold text-gray-800">{currentUser?.email}</p>
-//                   </div>
-//                   <div>
-//                     <p className="text-gray-600 text-sm">Phone</p>
-//                     <p className="text-lg font-semibold text-gray-800">{currentUser?.phone}</p>
-//                   </div>
-//                   <div>
-//                     <p className="text-gray-600 text-sm">Username</p>
-//                     <p className="text-lg font-semibold text-gray-800">{currentUser?.username}</p>
-//                   </div>
-//                 </div>
-//               </div>
-//             </div>
-//           )}
-
-//           {/* Users Tab */}
-//           {activeTab === 'users' && <UserManagement />}
-
-//           {/* Products Tab */}
-//           {activeTab === 'products' && <ProductManagement />}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default AdminDashboard;
-
 import React, { useState } from 'react';
 import { 
   Menu, X, LogOut, BarChart3, Users, Package, 
   ArrowUpRight, TrendingUp, UserCheck, Clock, Shield 
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../App';
-import AdminSidebar from '../components/AdminSidebar';
-import UserManagement from '../data_management/admin/UserManagement';
-import ProductManagement from '../data_management/admin/ProductManagement';
+import { useAuth } from '../../App';
+import AdminSidebar from '../../components/shared/AdminSidebar';
+import UserManagement from '../admin/UserManagement';
+import ProductManagement from '../admin/ProductManagement';
 
 const AdminDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -213,7 +39,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="flex h-screen bg-[#F8FAFC] overflow-hidden">
-      <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* TOP NAV - Modern Glassmorphism */}

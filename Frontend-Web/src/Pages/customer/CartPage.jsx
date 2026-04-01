@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Navbar from "../components/Navbar";
+import Navbar from "../../components/shared/Navbar";
 import { X, Plus, Minus, ShoppingBag } from "lucide-react";
 
 const CartPage = () => {

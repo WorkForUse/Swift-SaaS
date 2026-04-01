@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
-import  logo  from '../../assets/swift-logo.PNG'
+import logo from '../../assets/swift-logo.PNG';
 
 const Banner = () => {
   const banners = [

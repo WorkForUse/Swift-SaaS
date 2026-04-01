@@ -9,6 +9,9 @@ router.post('/customer/login', authController.customerLogin);
 // Seller routes
 router.post('/seller/signup', authController.sellerSignup);
 router.post('/seller/login', authController.sellerLogin);
+router.get('/seller/:sellerId/stats', authController.getSellerStats);
+router.put('/seller/:sellerId', authController.updateSeller);
+router.delete('/seller/:sellerId', authController.deleteSeller);
 
 // Admin routes
 router.post('/admin/signup', authController.adminSignup);

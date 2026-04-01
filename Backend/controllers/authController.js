@@ -1,51 +1,14 @@
 const User = require('../models/Users');
+const { UserDataManager, ProductDataManager, OrderDataManager, SellerStatsManager } = require('../data/hardcodedData');
 
-// Hardcoded fallback data for demo/testing
-const HARDCODED_USERS = {
-  customer: {
-    id: 'cust-001',
-    username: 'john_customer',
-    email: 'customer@example.com',
-    password: 'password123', // In production, this would be hashed
-    firstName: 'John',
-    lastName: 'Doe',
-    role: 'customer',
-    phone: '+1-234-567-8900',
-    isVerified: true,
-    isActive: true,
-    createdAt: new Date('2025-01-15')
-  },
-  admin: {
-    id: 'admin-001',
-    username: 'jane_admin',
-    email: 'admin@example.com',
-    password: 'adminpass123',
-    firstName: 'Jane',
-    lastName: 'Smith',
-    role: 'admin',
-    phone: '+1-987-654-3210',
-    isVerified: true,
-    isActive: true,
-    createdAt: new Date('2025-01-10')
-  },
-  seller: {
-    id: 'seller-001',
-    username: 'mike_seller',
-    email: 'seller@example.com',
-    password: 'sellerpass123',
-    firstName: 'Mike',
-    lastName: 'Johnson',
-    role: 'seller',
-    phone: '+1-555-123-4567',
-    shopName: 'Books Plus',
-    shopDescription: 'Premium textbooks and educational materials',
-    isVerified: true,
-    isActive: true,
-    createdAt: new Date('2025-01-12')
-  }
-};
+// Initialize hardcoded data managers
+const userDataManager = new UserDataManager();
+const productDataManager = new ProductDataManager();
+const orderDataManager = new OrderDataManager();
+const sellerStatsManager = new SellerStatsManager(userDataManager, productDataManager, orderDataManager);
+let useHardcodedData = false; // Toggle this based on DB connection
 
-// CUSTOMER SIGNUP
+// CUSTOMER SIGNUP - With Fallback
 exports.customerSignup = async (req, res) => {
   try {
     const { username, email, password, firstName, lastName, phone } = req.body;
@@ -58,8 +21,24 @@ exports.customerSignup = async (req, res) => {
       });
     }
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters'
+      });
+    }
+
+    let existingUser;
+    
+    // Try database first
+    try {
+      existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    } catch (dbError) {
+      console.log('DB Error, using hardcoded fallback');
+      useHardcodedData = true;
+      existingUser = userDataManager.findByEmail(email) || userDataManager.findByUsername(username);
+    }
+
     if (existingUser) {
       return res.status(400).json({
         success: false,
@@ -67,29 +46,62 @@ exports.customerSignup = async (req, res) => {
       });
     }
 
-    // Create new customer
-    const newCustomer = await User.create({
-      username,
-      email,
-      password, // In production, hash this password
-      firstName: firstName || '',
-      lastName: lastName || '',
-      phone: phone || '',
-      role: 'customer',
-      isVerified: false,
-      isActive: true
-    });
+    let newCustomer;
+
+    if (useHardcodedData) {
+      newCustomer = userDataManager.create({
+        username,
+        email,
+        password,
+        firstName: firstName || '',
+        lastName: lastName || '',
+        phone: phone || '',
+        role: 'customer',
+        isVerified: false,
+        isActive: true
+      });
+    } else {
+      try {
+        newCustomer = await User.create({
+          username,
+          email,
+          password,
+          firstName: firstName || '',
+          lastName: lastName || '',
+          phone: phone || '',
+          role: 'customer',
+          isVerified: false,
+          isActive: true
+        });
+      } catch (dbError) {
+        console.log('DB Error, using hardcoded fallback');
+        useHardcodedData = true;
+        newCustomer = userDataManager.create({
+          username,
+          email,
+          password,
+          firstName: firstName || '',
+          lastName: lastName || '',
+          phone: phone || '',
+          role: 'customer',
+          isVerified: false,
+          isActive: true
+        });
+      }
+    }
 
     res.status(201).json({
       success: true,
       message: 'Customer signed up successfully',
+      source: useHardcodedData ? 'hardcoded' : 'database',
       user: {
-        id: newCustomer._id,
+        id: newCustomer.id || newCustomer._id,
         username: newCustomer.username,
         email: newCustomer.email,
         role: newCustomer.role,
         firstName: newCustomer.firstName,
-        lastName: newCustomer.lastName
+        lastName: newCustomer.lastName,
+        phone: newCustomer.phone
       }
     });
   } catch (error) {
@@ -301,28 +313,36 @@ exports.adminLogin = async (req, res) => {
   }
 };
 
-// SELLER SIGNUP
+// SELLER SIGNUP - With Fallback
 exports.sellerSignup = async (req, res) => {
   try {
     const { username, email, password, firstName, lastName, phone, shopName, shopDescription } = req.body;
 
     // Validation
-    if (!username || !email || !password) {
+    if (!username || !email || !password || !shopName) {
       return res.status(400).json({
         success: false,
-        message: 'Username, email, and password are required'
+        message: 'Username, email, password, and shop name are required'
       });
     }
 
-    if (!shopName) {
+    if (password.length < 6) {
       return res.status(400).json({
         success: false,
-        message: 'Shop name is required for sellers'
+        message: 'Password must be at least 6 characters'
       });
     }
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    let existingUser;
+
+    try {
+      existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    } catch (dbError) {
+      console.log('DB Error, using hardcoded fallback');
+      useHardcodedData = true;
+      existingUser = userDataManager.findByEmail(email) || userDataManager.findByUsername(username);
+    }
+
     if (existingUser) {
       return res.status(400).json({
         success: false,
@@ -330,32 +350,76 @@ exports.sellerSignup = async (req, res) => {
       });
     }
 
-    // Create new seller
-    const newSeller = await User.create({
-      username,
-      email,
-      password,
-      firstName: firstName || '',
-      lastName: lastName || '',
-      phone: phone || '',
-      role: 'seller',
-      shopName,
-      shopDescription: shopDescription || '',
-      isVerified: false,
-      isActive: true
-    });
+    let newSeller;
+
+    if (useHardcodedData) {
+      newSeller = userDataManager.create({
+        username,
+        email,
+        password,
+        firstName: firstName || '',
+        lastName: lastName || '',
+        phone: phone || '',
+        shopName,
+        shopDescription: shopDescription || '',
+        role: 'seller',
+        isVerified: false,
+        isActive: true,
+        totalSales: 0,
+        rating: 0
+      });
+    } else {
+      try {
+        newSeller = await User.create({
+          username,
+          email,
+          password,
+          firstName: firstName || '',
+          lastName: lastName || '',
+          phone: phone || '',
+          shopName,
+          shopDescription: shopDescription || '',
+          role: 'seller',
+          isVerified: false,
+          isActive: true,
+          totalSales: 0,
+          rating: 0
+        });
+      } catch (dbError) {
+        console.log('DB Error, using hardcoded fallback');
+        useHardcodedData = true;
+        newSeller = userDataManager.create({
+          username,
+          email,
+          password,
+          firstName: firstName || '',
+          lastName: lastName || '',
+          phone: phone || '',
+          shopName,
+          shopDescription: shopDescription || '',
+          role: 'seller',
+          isVerified: false,
+          isActive: true,
+          totalSales: 0,
+          rating: 0
+        });
+      }
+    }
 
     res.status(201).json({
       success: true,
       message: 'Seller signed up successfully',
+      source: useHardcodedData ? 'hardcoded' : 'database',
       user: {
-        id: newSeller._id,
+        id: newSeller.id || newSeller._id,
         username: newSeller.username,
         email: newSeller.email,
         role: newSeller.role,
         firstName: newSeller.firstName,
         lastName: newSeller.lastName,
-        shopName: newSeller.shopName
+        phone: newSeller.phone,
+        shopName: newSeller.shopName,
+        shopDescription: newSeller.shopDescription
       }
     });
   } catch (error) {
@@ -610,4 +674,174 @@ exports.getHardcodedUsers = (req, res) => {
     message: 'Hardcoded demo users for testing',
     users: HARDCODED_USERS
   });
+};
+
+// GET SELLER STATS - With Fallback
+exports.getSellerStats = async (req, res) => {
+  try {
+    const { sellerId } = req.params;
+
+    if (!sellerId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Seller ID is required'
+      });
+    }
+
+    let stats;
+
+    // Try database first
+    try {
+      const seller = await User.findById(sellerId);
+      if (!seller || seller.role !== 'seller') {
+        return res.status(404).json({
+          success: false,
+          message: 'Seller not found'
+        });
+      }
+      // For now, use hardcoded stats
+      stats = sellerStatsManager.getSellerStats(sellerId);
+    } catch (dbError) {
+      console.log('DB Error, using hardcoded fallback');
+      useHardcodedData = true;
+      stats = sellerStatsManager.getSellerStats(sellerId);
+    }
+
+    if (!stats) {
+      return res.status(404).json({
+        success: false,
+        message: 'Seller not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Seller stats retrieved successfully',
+      source: useHardcodedData ? 'hardcoded' : 'database',
+      stats: stats.stats,
+      seller: stats.seller
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error retrieving seller stats',
+      error: error.message
+    });
+  }
+};
+
+// UPDATE SELLER - With Fallback
+exports.updateSeller = async (req, res) => {
+  try {
+    const { sellerId } = req.params;
+    const updateData = req.body;
+
+    if (!sellerId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Seller ID is required'
+      });
+    }
+
+    let updatedSeller;
+
+    // Try database first
+    try {
+      updatedSeller = await User.findByIdAndUpdate(
+        sellerId,
+        updateData,
+        { new: true }
+      );
+      if (!updatedSeller) {
+        throw new Error('Seller not found');
+      }
+    } catch (dbError) {
+      console.log('DB Error, using hardcoded fallback');
+      useHardcodedData = true;
+      updatedSeller = userDataManager.update(sellerId, updateData);
+      
+      if (!updatedSeller) {
+        return res.status(404).json({
+          success: false,
+          message: 'Seller not found'
+        });
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Seller updated successfully',
+      source: useHardcodedData ? 'hardcoded' : 'database',
+      user: {
+        id: updatedSeller.id || updatedSeller._id,
+        email: updatedSeller.email,
+        firstName: updatedSeller.firstName,
+        lastName: updatedSeller.lastName,
+        shopName: updatedSeller.shopName,
+        shopDescription: updatedSeller.shopDescription,
+        shopCategory: updatedSeller.shopCategory
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error updating seller',
+      error: error.message
+    });
+  }
+};
+
+// DELETE SELLER - With Fallback
+exports.deleteSeller = async (req, res) => {
+  try {
+    const { sellerId } = req.params;
+
+    if (!sellerId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Seller ID is required'
+      });
+    }
+
+    let deleted = false;
+
+    // Try database first
+    try {
+      const result = await User.findByIdAndDelete(sellerId);
+      deleted = result !== null;
+    } catch (dbError) {
+      console.log('DB Error, using hardcoded fallback');
+      useHardcodedData = true;
+      deleted = userDataManager.delete(sellerId);
+    }
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: 'Seller not found or already deleted'
+      });
+    }
+
+    // Also delete seller's products
+    try {
+      const sellerProducts = productDataManager.findBySellerId(sellerId);
+      sellerProducts.forEach(product => {
+        productDataManager.delete(product.id);
+      });
+    } catch (error) {
+      console.log('Error deleting seller products:', error.message);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Seller account deleted successfully',
+      source: useHardcodedData ? 'hardcoded' : 'database'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting seller',
+      error: error.message
+    });
+  }
 };

@@ -11,12 +11,12 @@ export const mockUsers = [
 ];
 
 export const mockProducts = [
-  { id: 1, name: 'Advanced Mathematics Textbook', price: 49.99, image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200', status: 'active', deleted: false, stock: 50 },
-  { id: 2, name: 'Physics Fundamentals', price: 59.99, image: 'https://images.unsplash.com/photo-1526042210328-e14fd198e8ee?w=200', status: 'active', deleted: false, stock: 30 },
-  { id: 3, name: 'Chemistry Essentials', price: 44.99, image: 'https://images.unsplash.com/photo-1589872751848-0152c4bbaa55?w=200', status: 'out_of_stock', deleted: false, stock: 0 },
-  { id: 4, name: 'Biology Advanced', price: 69.99, image: 'https://images.unsplash.com/photo-1586954603494-76c5b7f27491?w=200', status: 'inactive', deleted: false, stock: 20 },
-  { id: 5, name: 'Calculus Vol 2', price: 54.99, image: 'https://images.unsplash.com/photo-1524178232363-933d95a15c23?w=200', status: 'active', deleted: true, stock: 10 },
-  { id: 6, name: 'Organic Chemistry', price: 79.99, image: 'https://images.unsplash.com/photo-1585388009708-51c3b21f2917?w=200', status: 'active', deleted: false, stock: 25 }
+  { id: 1, name: 'Advanced Mathematics Textbook', category: 'Mathematics', description: 'Comprehensive advanced math concepts for university students.', price: 49.99, image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200', status: 'active', deleted: false, stock: 50 },
+  { id: 2, name: 'Physics Fundamentals', category: 'Physics', description: 'Core physics principles with practical examples.', price: 59.99, image: 'https://images.unsplash.com/photo-1526042210328-e14fd198e8ee?w=200', status: 'active', deleted: false, stock: 30 },
+  { id: 3, name: 'Chemistry Essentials', category: 'Chemistry', description: 'Essential chemistry topics for beginners.', price: 44.99, image: 'https://images.unsplash.com/photo-1589872751848-0152c4bbaa55?w=200', status: 'out_of_stock', deleted: false, stock: 0 },
+  { id: 4, name: 'Biology Advanced', category: 'Biology', description: 'Advanced biological systems and genetics.', price: 69.99, image: 'https://images.unsplash.com/photo-1586954603494-76c5b7f27491?w=200', status: 'inactive', deleted: false, stock: 20 },
+  { id: 5, name: 'Calculus Vol 2', category: 'Mathematics', description: 'Multivariable calculus and vector analysis.', price: 54.99, image: 'https://images.unsplash.com/photo-1524178232363-933d95a15c23?w=200', status: 'active', deleted: true, stock: 10 },
+  { id: 6, name: 'Organic Chemistry', category: 'Chemistry', description: 'Reaction mechanisms and synthesis techniques.', price: 79.99, image: 'https://images.unsplash.com/photo-1585388009708-51c3b21f2917?w=200', status: 'active', deleted: false, stock: 25 }
 ];
 
 // Helper functions for CRUD simulation
