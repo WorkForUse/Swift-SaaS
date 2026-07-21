@@ -54,7 +54,18 @@ const Navbar = () => {
     setIsSearchOpen(false);
   };
 
-  const navItems = ['Home', 'Shop', 'Collections', 'About Us', 'Contact', 'Partners'];
+  const paths = {
+    'Home': '/',
+    'Shop': '/products',
+    'Categories': '/categories',
+    'Services': '/services',
+    'Collections': '/collections',
+    'About Us': '/about-us',
+    'Contact': '/contact',
+    'Partners': '/partners'
+  };
+
+  const navItems = ['Home', 'Shop', 'Categories', 'Services', 'Collections', 'About Us', 'Contact', 'Partners'];
 
   return (
     <>
@@ -87,17 +98,20 @@ const Navbar = () => {
 
           {/* Nav Links */}
           <nav className="hidden lg:flex items-center gap-10 font-black text-gray-500 uppercase text-[12px] tracking-widest list-none">
-            {navItems.map((item) => (
-              <li key={item} 
-                  onClick={() => {
-                    const path = item === 'Home' ? '/' : `/${item.toLowerCase().replace(/ /g, '-').replace('us', 'us')}`;
-                    handleNav(path);
-                  }}
-                  className="cursor-pointer hover:text-[#07477D] transition-colors relative group">
-                {item}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#3ABEF9] transition-all group-hover:w-full"></span>
-              </li>
-            ))}
+{navItems.map((item) => {
+                const path = paths[item];
+                const isActive = location.pathname === path;
+                return (
+                  <li key={item} 
+                      onClick={() => handleNav(path)}
+                      className={`cursor-pointer transition-colors relative group font-black text-[12px] tracking-widest uppercase ${isActive 
+                        ? 'text-[#07477D] scale-[1.05] underline decoration-2 underline-offset-4 decoration-[#3ABEF9]' 
+                        : 'text-gray-500 hover:text-[#07477D]'}`}>
+                    {item}
+                    {!isActive && <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#3ABEF9] transition-all group-hover:w-full"></span>}
+                  </li>
+                );
+              })}
           </nav>
 
           {/* Actions */}
@@ -212,12 +226,17 @@ const Navbar = () => {
             <X size={24} className="cursor-pointer text-gray-400" onClick={() => setIsMenuOpen(false)} />
           </div>
           <ul className="space-y-8 list-none p-0">
-             {navItems.map(item => (
-               <li key={item} className="font-black text-sm uppercase tracking-[0.2em] text-gray-800 hover:text-[#3ABEF9] cursor-pointer" onClick={() => {
-                 const path = item === 'Home' ? '/' : `/${item.toLowerCase().replace(/ /g, '-')}`;
-                 handleNav(path);
-               }}>{item}</li>
-             ))}
+             {navItems.map(item => {
+               const path = paths[item];
+               const isActive = location.pathname === path;
+               return (
+                 <li key={item} className={`font-black text-sm uppercase tracking-[0.2em] cursor-pointer transition-colors ${isActive 
+                   ? 'text-[#07477D] border-r-4 border-[#3ABEF9] pr-4' 
+                   : 'text-gray-800 hover:text-[#3ABEF9]'}`} onClick={() => handleNav(path)}>
+                   {item}
+                 </li>
+               );
+             })}
           </ul>
         </div>
       </div>

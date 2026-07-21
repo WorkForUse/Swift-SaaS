@@ -21,7 +21,9 @@ const SellerSignup = lazy(() => import('./Pages/auth/SellerSignupOnboarding'));
 const AboutPage = lazy(() => import('./Pages/public/AboutPage'));
 const ContactPage = lazy(() => import('./Pages/public/ContactPage'));
 
-const PartnerDocs = lazy(() => import('./Pages/public/PartnerDocs'));
+const PartnerDocs = lazy(() => import('./Pages/public/PartnerDocs')); 
+const ServicesPage = lazy(() => import('./Pages/public/ServicesPage'));
+const CategoriesPage = lazy(() => import('./Pages/public/Categories'));
 
 const AuthContext = createContext();
 
@@ -161,10 +163,7 @@ const MainContent = () => {
             <Route path="/cart" element={<CartPage />} />
             <Route path="/shop" element={<Products />} />
             <Route path="/products" element={<Products />} />
-            <Route path="/collections" element={<CollectionPage />} />
-
-            
-            {/* Customer Authentication Routes */}
+<Route path="/collections" element={<CollectionPage />} />\n            <Route path="/categories" element={<CategoriesPage />} />\n            <Route path="/services" element={<ServicesPage />} />\n\n            \n            {/* Customer Authentication Routes */}
             <Route path="/customer/login" element={<CustomerLogin />} />
             <Route path="/customer/signup" element={<CustomerSignup />} />
 
